@@ -111,6 +111,7 @@ diff -ru ./okf-bundle ./restored-bundle   # byte-identical
 
 ## Documentation
 
+- **[Tutorial: Building a Hybrid API & Institutional Knowledge Graph](docs/tutorial-hybrid-api-kb.md)** — Hands-on walkthrough combining `.proto` schemas, human-reviewed ADRs, and SQL metrics with `okf-proto` and `binder` for cross-domain blast-radius queries.
 - **[Why Protocol Buffers and the Open Knowledge Format Belong Together](docs/why-okf-proto.md)** — Diátaxis explanation of how Protobuf/Buf schemas and OKF v0.2 knowledge graphs complement each other across schema ingestion and wire transport.
 - **[Connector Guide: Protocol Buffers & Buf](docs/connector-protobuf-buf.md)** — Step-by-step recipe for generating OKF bundles from `.proto` files and verifying lossless `.binpb` / ProtoJSON round-trips.
 

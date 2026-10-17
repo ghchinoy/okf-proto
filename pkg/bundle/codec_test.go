@@ -143,9 +143,8 @@ func TestExportImportRoundTripByteFaithful(t *testing.T) {
 func TestCyclicAliasRejectedCleanly(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, dir, "cyclic.md", "---\ntype: Note\na: &x\n  b: *x\n---\n\n# Cyclic\n")
-	_, err := Export(dir, ExportOptions{})
-	if err == nil || !strings.Contains(err.Error(), "contains itself") {
-		t.Fatalf("expected cyclic alias error, got: %v", err)
+	if _, err := Export(dir, ExportOptions{}); err == nil || !strings.Contains(err.Error(), "contains itself") {
+		t.Fatalf("Export(%q) error = %v, want cyclic alias error containing 'contains itself'", dir, err)
 	}
 }
 

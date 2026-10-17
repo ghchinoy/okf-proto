@@ -81,10 +81,9 @@ func runExport(args []string) int {
 
 	fmtMode := strings.ToLower(strings.TrimSpace(*format))
 	if fmtMode == "" {
+		fmtMode = "json"
 		if strings.HasSuffix(strings.ToLower(*outPath), ".binpb") || strings.HasSuffix(strings.ToLower(*outPath), ".pb") {
 			fmtMode = "binpb"
-		} else {
-			fmtMode = "json"
 		}
 	}
 	if fmtMode != "binpb" && fmtMode != "json" {
@@ -145,10 +144,9 @@ func runImport(args []string) int {
 
 	fmtMode := strings.ToLower(strings.TrimSpace(*format))
 	if fmtMode == "auto" || fmtMode == "" {
+		fmtMode = "binpb"
 		if strings.HasSuffix(strings.ToLower(inPath), ".json") || (len(raw) > 0 && raw[0] == '{') {
 			fmtMode = "json"
-		} else {
-			fmtMode = "binpb"
 		}
 	}
 

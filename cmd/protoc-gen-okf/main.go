@@ -101,9 +101,9 @@ func writeError(msg string) {
 	resp := &pluginpb.CodeGeneratorResponse{Error: &msg}
 	if out, err := proto.Marshal(resp); err == nil {
 		_, _ = os.Stdout.Write(out)
-	} else {
-		fmt.Fprintln(os.Stderr, msg)
+		return
 	}
+	fmt.Fprintln(os.Stderr, msg)
 }
 
 func resolveNow() time.Time {

@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"path"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -716,7 +717,7 @@ func buildCommentMap(sci *descriptorpb.SourceCodeInfo) map[string]string {
 func pathKey(p []int32) string {
 	parts := make([]string, len(p))
 	for i, v := range p {
-		parts[i] = fmt.Sprintf("%d", v)
+		parts[i] = strconv.Itoa(int(v))
 	}
 	return strings.Join(parts, ".")
 }

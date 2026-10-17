@@ -1,0 +1,13 @@
+# Go binaries & test outputs
+/bin/
+/dist/
+*.test
+*.out
+*.binpb
+*.pb
+*.json
+!buf.gen.yaml
+!package.json
+
+# Local tool state
+.serena/

@@ -1,0 +1,156 @@
+// Copyright 2026 G. Hussain Chinoy
+// SPDX-License-Identifier: Apache-2.0
+
+syntax = "proto3";
+
+package okf.v1;
+
+import "google/protobuf/struct.proto";
+
+option go_package = "github.com/ghchinoy/okf-proto/gen/go/okf/v1;okfv1pb";
+
+// Bundle represents a complete Open Knowledge Format (OKF) v0.2 bundle.
+message Bundle {
+  // Declared OKF spec revision from the root index.md (e.g. "0.2", spec §12).
+  string okf_version = 1;
+
+  // Non-reserved concept documents in the bundle, ordered deterministically by id.
+  repeated Concept concepts = 2;
+
+  // Reserved files (index.md, log.md; spec §3.1/§8/§9), ordered by rel_path.
+  repeated ReservedFile reserved = 3;
+}
+
+// Concept is a single OKF v0.2 concept document (spec §2, §4, §5, §6, §10).
+message Concept {
+  // Bundle-relative path minus ".md" (e.g. "tables/orders", spec §2).
+  string id = 1;
+
+  // Bundle-relative file path (e.g. "tables/orders.md").
+  string rel_path = 2;
+
+  // Required concept type (e.g. "BigQuery Table", "Protobuf Message", spec §4.1/§11).
+  string type = 3;
+
+  // Recommended human-readable title (spec §4.1).
+  string title = 4;
+
+  // Recommended short summary (spec §4.1).
+  string description = 5;
+
+  // Optional canonical URI/identifier of the external resource (spec §4.1).
+  string resource = 6;
+
+  // Classification tags (spec §4.1).
+  repeated string tags = 7;
+
+  // Provenance sources (spec §5.1).
+  repeated Source sources = 8;
+
+  // Shared usage window framing sources[].usage_count (spec §5.1).
+  DateRange usage_window = 9;
+
+  // Generation provenance stamp (spec §5.2).
+  Actorstamp generated = 10;
+
+  // Verification / review events (spec §5.2/§5.3).
+  repeated Actorstamp verified = 11;
+
+  // Lifecycle status: "draft", "stable", or "deprecated" (absent => "stable", spec §5.4).
+  string status = 12;
+
+  // Expiration timestamp: ISO 8601 datetime or YYYY-MM-DD date (spec §5.5).
+  string stale_after = 13;
+
+  // Derived trust signals (never stored in frontmatter; computed per spec §5.3/§5.5/§10).
+  DerivedTrust derived = 14;
+
+  // Extracted directed cross-links from the markdown body (spec §6).
+  repeated Link links = 15;
+
+  // Markdown body after the closing "---" frontmatter fence.
+  string body = 16;
+
+  // Full top-level frontmatter key-value map, including arbitrary producer
+  // extension keys (spec §4.1 "consumers SHOULD preserve unknown keys").
+  google.protobuf.Struct frontmatter = 17;
+
+  // Top-level frontmatter keys in their authored insertion order.
+  repeated string frontmatter_key_order = 18;
+
+  // Optional raw bytes of the source YAML frontmatter block (between "---" fences)
+  // for byte-faithful round-tripping when frontmatter has not been mutated.
+  bytes original_frontmatter = 19;
+}
+
+// ReservedFile is a non-concept reserved markdown file (index.md or log.md, spec §3.1).
+message ReservedFile {
+  // Bundle-relative path (e.g. "index.md", "tables/index.md", "log.md").
+  string rel_path = 1;
+
+  // Full raw markdown content of the reserved file.
+  string content = 2;
+}
+
+// Actorstamp is a { by, at } provenance pair used by generated and verified (spec §5.2).
+message Actorstamp {
+  // Actor identifier following spec §7 (human:<id>, process:<id>, team:<id>, or <producer>/<version>).
+  string by = 1;
+
+  // ISO 8601 datetime with UTC offset (e.g. "2026-06-30T14:00:00Z").
+  string at = 2;
+}
+
+// Source is one entry in the sources provenance family (spec §5.1).
+message Source {
+  // Join key for footnote attribution [^id] in the body.
+  string id = 1;
+
+  // Required URI or bundle-relative path of the source material.
+  string resource = 2;
+
+  // Human-readable title of the source.
+  string title = 3;
+
+  // Actor responsible for the source (spec §7).
+  string author = 4;
+
+  // Coarse exercise/usage count signal (stored as string to preserve exact scalar representation).
+  string usage_count = 5;
+
+  // When the source itself last changed (ISO 8601 datetime or YYYY-MM-DD).
+  string last_modified = 6;
+}
+
+// DateRange is a { from, to } window framing usage_count (spec §5.1).
+message DateRange {
+  string from = 1;
+  string to = 2;
+}
+
+// DerivedTrust holds signals computed from frontmatter, never stored in YAML (spec §5.3/§5.5/§10).
+message DerivedTrust {
+  // Derived trust tier: "unverified", "machine-confirmed", or "human-reviewed" (spec §5.3).
+  string tier = 1;
+
+  // Whether the concept is stale as of the evaluation date (now >= stale_after, spec §5.5).
+  bool stale = 2;
+
+  // Whether type == "Attested Computation" (spec §10).
+  bool attested = 3;
+}
+
+// Link is a directed edge extracted from a concept's markdown body (spec §6).
+message Link {
+  // Target exactly as written in the markdown link destination.
+  string raw_target = 1;
+
+  // Resolved bundle-relative concept ID (or "" if external/unresolved).
+  string target_id = 2;
+
+  // Link anchor text (serves as relationship label by convention).
+  string text = 3;
+
+  // True when target_id resolves to a concept or reserved file in the bundle.
+  bool resolved = 4;
+}

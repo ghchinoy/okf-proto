@@ -1,0 +1,62 @@
+// Copyright 2026 G. Hussain Chinoy
+// SPDX-License-Identifier: Apache-2.0
+
+syntax = "proto3";
+
+package acme.orders.v1;
+
+option go_package = "github.com/ghchinoy/okf-proto/testdata/acme/orders/v1;ordersv1";
+
+// OrderStatus represents the lifecycle state of a customer purchase order.
+enum OrderStatus {
+  // Default unspecified status.
+  ORDER_STATUS_UNSPECIFIED = 0;
+  // Order has been placed and is awaiting fulfillment.
+  ORDER_STATUS_PENDING = 1;
+  // Order has been fulfilled and shipped.
+  ORDER_STATUS_SHIPPED = 2;
+  // Order was cancelled.
+  ORDER_STATUS_CANCELLED = 3;
+}
+
+// LineItem is a single SKU and quantity within an Order.
+message LineItem {
+  // Product SKU identifier.
+  string sku = 1;
+  // Quantity ordered.
+  int32 quantity = 2;
+  // Unit price in minor currency units (cents).
+  int64 unit_price_cents = 3;
+}
+
+// Order represents a confirmed customer purchase order.
+message Order {
+  // Unique order identifier.
+  string order_id = 1;
+  // Customer account identifier.
+  string customer_id = 2;
+  // Current lifecycle state of the order.
+  OrderStatus status = 3;
+  // Line items included in the order.
+  repeated LineItem items = 4;
+  // arbitrary metadata labels.
+  map<string, string> labels = 5;
+}
+
+// GetOrderRequest requests a single Order by ID.
+message GetOrderRequest {
+  // Unique order identifier to look up.
+  string order_id = 1;
+}
+
+// LegacyOrderV0 is a deprecated v0 order record retained for migration.
+message LegacyOrderV0 {
+  option deprecated = true;
+  string legacy_id = 1;
+}
+
+// OrderService provides read access to customer orders.
+service OrderService {
+  // GetOrder retrieves a single Order by its identifier.
+  rpc GetOrder(GetOrderRequest) returns (Order);
+}

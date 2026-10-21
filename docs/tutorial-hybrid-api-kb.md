@@ -170,6 +170,46 @@ All three OKF §5.3 trust tiers are now visible in one bundle:
 - **`machine-confirmed` (5):** The `services/` and `messages/` concepts attested by `process:buf-breaking-ci`.
 - **`unverified` (1):** `enums/acme/orders/v1/OrderStatus`, which has not yet been attested.
 
+### Gate on a Minimum Trust Tier Floor in CI (`--require-tier`)
+
+While OKF v0.2 consumers never reject a bundle for lacking verification, a CI pipeline publishing a bundle can enforce an explicit minimum trust tier floor (`unverified`, `machine-confirmed`, or `human-reviewed`) with `binder review --require-tier` (v0.8.0+). When any concept falls below the required tier, `binder review` exits `1` and lists *why* each concept fell short:
+
+```bash
+binder review "$WORK/kb" --today 2026-08-15 --require-tier machine-confirmed
+echo "exit=$?"
+```
+
+```text
+binder review
+  bundle: /tmp/.../kb
+  concepts: 8
+  by type:
+    Decision: 1
+    Metric: 1
+    Protobuf Enum: 1
+    Protobuf Message: 4
+    Protobuf Service: 1
+  trust tiers:
+    human-reviewed: 2
+    machine-confirmed: 5
+    unverified: 1
+  below required tier (machine-confirmed): 1
+    enums/acme/orders/v1/OrderStatus (unverified: no verified entry)
+  stale (as of 2026-08-15): 0
+  attested computations: 0
+  unparsed frontmatter (recovered as body): 0
+  entrypoints (no inbound links): 2
+    decisions/adr-012-order-cancellation
+    metrics/recognized-revenue
+  orphans (no inbound or outbound links): 1
+    messages/acme/orders/v1/LegacyOrderV0
+  unresolved links: 0
+binder: review found 1 concept(s) below required tier "machine-confirmed" (--require-tier): enums/acme/orders/v1/OrderStatus (unverified: no verified entry)
+exit=1
+```
+
+If a production release pipeline requires `human-reviewed` across the entire bundle, the shortfall list distinguishes the unverified enum (`no verified entry`) from the 5 CI-attested Protobuf concepts (`verified only by non-human actor(s): process:buf-breaking-ci`), turning a red CI build into an immediate review checklist.
+
 ---
 
 ## Step 4: Cross-Domain Blast-Radius & Lineage Queries
